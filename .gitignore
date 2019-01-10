@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+!__init__.py
+**/migrations/*
+*env
+**/.idea/**
+**/node_modules/**
+*.pyc
