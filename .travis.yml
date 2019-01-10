@@ -10,7 +10,7 @@ services:
   - postgresql
 
 env:
-  - DJANGO=2.0 DB=postgresql SECRET_KEY='=xti712i87pm=a_wyq$chj8v)zqzzp))q1*5!padcx1yhx=%^)' DEBUG='True' ENGINE='django.db.backends.postgresql' DB_NAME='Project_Finder' DB_USER='postgres' DB_PASS='pass@123' DB_HOST='localhost' DB_PORT='5432'
+  - DJANGO=2.0 DB=postgresql SECRET_KEY='=xti712i87pm=a_wyq$chj8v)zqzzp))q1*5!padcx1yhx=%^)' DEBUG='True' ENGINE='django.db.backends.postgresql' DB_NAME='Project_Finder' DB_USER='root' DB_PASS='pass@123' DB_HOST='localhost' DB_PORT='5432'
 
 before_install:
   - export DJANGO_SETTINGS_MODULE=project_finder.settings
