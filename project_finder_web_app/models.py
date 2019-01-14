@@ -20,7 +20,7 @@ class Project(models.Model):
 
 class ProjectTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    project = models.OneToOneField(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     # leader = models.ForeignKey(User, on_delete=models.CASCADE)
     # current_members = models.ManyToManyField(User)
     vacancies = models.PositiveSmallIntegerField(default=3)
