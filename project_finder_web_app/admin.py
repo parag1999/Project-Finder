@@ -1,5 +1,5 @@
 from django.contrib import admin
-from accounts.models import User
+from project_finder_web_app.models import User
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
