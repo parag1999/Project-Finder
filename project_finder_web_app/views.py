@@ -20,7 +20,7 @@ from rest_framework.permissions import (
     IsAdminUser,
     IsAuthenticatedOrReadOnly,
 )
-from accounts.serializers import UserCreateSerializer, UserLoginSerializer, UserDetailSerializer
+from project_finder_web_app.serializers import UserCreateSerializer, UserLoginSerializer, UserDetailSerializer
 
 
 class UserDetailViewSet(viewsets.ModelViewSet):
