@@ -18,7 +18,6 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
     IsAdminUser,
-    IsAuthenticatedOrReadOnly,
 )
 from project_finder_web_app.serializers import UserCreateSerializer, UserLoginSerializer, UserDetailSerializer
 
