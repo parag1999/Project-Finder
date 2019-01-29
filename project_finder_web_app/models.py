@@ -89,6 +89,7 @@ class ProjectTeamRequest(models.Model):
         self.status = 'R'
         self.save()
 
+
 class Hackathon(models.Model):
     name = models.CharField(max_length=50, unique=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
