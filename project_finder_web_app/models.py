@@ -28,8 +28,8 @@ class User(AbstractUser):
         ('BE', 'Fourth Year'),
     )
     year = models.CharField(max_length=2, choices=years, default='FE')
-    skills = models.ManyToManyField(Skill)
-    interests = models.ManyToManyField(Skill)
+    skills = models.ManyToManyField(Skill, related_name="user_skills")
+    interests = models.ManyToManyField(Skill, related_name="user_interests")
 
     def __str__(self):
         return self.email
@@ -54,7 +54,7 @@ class ProjectTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     leader = models.ForeignKey(User, on_delete=models.CASCADE)
-    current_members = models.ManyToManyField(User)
+    current_members = models.ManyToManyField(User, related_name="team_members")
     vacancies = models.PositiveSmallIntegerField(default=3)
     closed = models.BooleanField(default=False)
 
