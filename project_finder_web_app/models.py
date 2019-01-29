@@ -53,8 +53,8 @@ class Project(models.Model):
 class ProjectTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    leader = models.ForeignKey(User, on_delete=models.CASCADE)
-    current_members = models.ManyToManyField(User, related_name="team_members")
+    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_leader")
+    current_members = models.ManyToManyField(User, related_name="project_members")
     vacancies = models.PositiveSmallIntegerField(default=3)
     closed = models.BooleanField(default=False)
 
@@ -102,8 +102,8 @@ class Hackathon(models.Model):
 
 class HackathonTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    leader = models.ForeignKey(User, on_delete=models.CASCADE)
-    current_members = models.ManyToManyField(User, related_name="team_members")
+    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="hackathon_leader")
+    current_members = models.ManyToManyField(User, related_name="hackathon_members")
     hackathon = models.ForeignKey(Hackathon, on_delete=models.CASCADE)
     vacancies = models.PositiveSmallIntegerField(default=3)
     closed = models.BooleanField(default=False)
