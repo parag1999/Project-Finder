@@ -27,12 +27,9 @@ class UserDetailSerializer(ModelSerializer):
             'is_teacher',
             'bio',
             'year',
-            'skill_1',
-            'skill_2',
-            'skill_3',
-            'interest_1',
-            'interest_2',
-            'interest_3',
+            'skills',
+            'interests',
+
 
             # 'first_name',
             # 'last_name',
@@ -55,12 +52,8 @@ class UserCreateSerializer(ModelSerializer):
             'is_teacher',
             'bio',
             'year',
-            'skill_1',
-            'skill_2',
-            'skill_3',
-            'interest_1',
-            'interest_2',
-            'interest_3',
+            'skills',
+            'interests',
 
             # 'first_name',
             # 'last_name',
@@ -88,12 +81,8 @@ class UserCreateSerializer(ModelSerializer):
             is_mentor=validated_data["is_mentor"],
             is_teacher=validated_data["is_teacher"],
             year=validated_data["year"],
-            skill_1=validated_data["skill_1"],
-            skill_2=validated_data["skill_2"],
-            skill_3=validated_data["skill_3"],
-            interest_1=validated_data["interest_1"],
-            interest_2=validated_data["interest_2"],
-            interest_3=validated_data["interest_3"],
+            skills=validated_data["skills"],
+            interests=validated_data["interests"],
         )
         user_obj.set_password(password)
         user_obj.save()
