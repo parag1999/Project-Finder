@@ -29,6 +29,10 @@ class UserDetailSerializer(ModelSerializer):
             'year',
             'skills',
             'interests',
+            'Github',
+            'LinkedIN',
+            'Behance',
+            'StackOverFlow',
 
 
             # 'first_name',
@@ -54,6 +58,10 @@ class UserCreateSerializer(ModelSerializer):
             'year',
             'skills',
             'interests',
+            'Github',
+            'LinkedIN',
+            'Behance',
+            'StackOverFlow',
 
             # 'first_name',
             # 'last_name',
