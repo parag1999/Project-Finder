@@ -11,21 +11,28 @@ class Skill(models.Model):
         return self.skill
 
 
+def path(instance, filename):
+    return 'photos/{0}/{1}'.format(instance.mobile, filename)
+
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     sap_id = models.CharField(max_length=15, unique=True)
     mobile = models.CharField(max_length=10, unique=True)
-    photo = models.FileField(upload_to='certain_location', blank=True, null=True)
+    photo = models.FileField(upload_to=path, blank=True, null=True)
     is_mentor = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     Github = models.URLField(null=True, blank=True)
     LinkedIN = models.URLField(null=True, blank=True)
+    Behance = models.URLField(null=True, blank=True)
+    StackOverFlow = models.URLField(null=True, blank=True)
     years = (
         ('FE', 'First Year'),
         ('SE', 'Second Year'),
         ('TE', 'Third Year'),
         ('BE', 'Fourth Year'),
+        ('AL', 'Alumini'),
     )
     year = models.CharField(max_length=2, choices=years, default='FE')
     skills = models.ManyToManyField(Skill, related_name="user_skills")
