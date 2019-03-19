@@ -1,4 +1,3 @@
-import requests
 from .models import (
     Hackathon,
     HackathonTeam,
