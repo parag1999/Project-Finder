@@ -18,9 +18,10 @@ before_script:
   - psql -c "CREATE DATABASE project_finder WITH OWNER root ENCODING 'UTF8';" -U postgres
   - python3 manage.py makemigrations project_finder_web_app
   - python3 manage.py migrate
+  - python3 manage.py migrate --run-syncdb
 
 env:
-  - DJANGO=2.1.4 DB=postgresql SECRET_KEY='=xti712i87pm=a_wyq$chj8v)zqzzp))q1*5!padcx1yhx=%^)' DEBUG='True' ENGINE='django.db.backends.postgresql_psycopg2' DB_NAME='project_finder' DB_USER='root' DB_PASS='pass@123' DB_HOST='localhost' DB_PORT='5432'
+  - DJANGO=2.1.5 DB=postgresql SECRET_KEY='=xti712i87pm=a_wyq$chj8v)zqzzp))q1*5!padcx1yhx=%^)' DEBUG='True' ENGINE='django.db.backends.postgresql_psycopg2' DB_NAME='project_finder' DB_USER='root' DB_PASS='pass@123' DB_HOST='localhost' DB_PORT='5432'
 
 script:
   - flake8

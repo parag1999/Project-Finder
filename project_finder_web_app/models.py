@@ -4,15 +4,15 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 
+def path(instance, filename):
+    return 'photos/{0}/{1}'.format(instance.mobile, filename)
+
+
 class Skill(models.Model):
     skill = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.skill
-
-
-def path(instance, filename):
-    return 'photos/{0}/{1}'.format(instance.mobile, filename)
 
 
 class User(AbstractUser):
@@ -61,7 +61,15 @@ class ProjectTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_leader")
-    current_members = models.ManyToManyField(User, related_name="project_members")
+    current_member1 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="project_member_1", null=True, blank=True)
+    current_member2 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="project_member_2", null=True, blank=True)
+    current_member3 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="project_member_3", null=True, blank=True)
     vacancies = models.PositiveSmallIntegerField(default=3)
     closed = models.BooleanField(default=False)
 
@@ -84,6 +92,7 @@ class ProjectTeamRequest(models.Model):
         ('R', 'Rejected'),
     )
     status = models.CharField(max_length=1, choices=status_choices, default='P')
+    skills = models.ManyToManyField(Skill)
 
     def __str__(self):
         return self.sender.username + ' --> ' + self.team.name
@@ -111,7 +120,16 @@ class Hackathon(models.Model):
 class HackathonTeam(models.Model):
     name = models.CharField(max_length=50, unique=True)
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="hackathon_leader")
-    current_members = models.ManyToManyField(User, related_name="hackathon_members")
+    # current_members = models.ManyToManyField(User, related_name="hackathon_members")
+    current_member1 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="hackathon_member_1", null=True, blank=True)
+    current_member2 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="hackathon_member_2", null=True, blank=True)
+    current_member3 = models.OneToOneField(User,
+                                           on_delete=models.CASCADE,
+                                           related_name="hackathon_member_3", null=True, blank=True)
     hackathon = models.ForeignKey(Hackathon, on_delete=models.CASCADE)
     vacancies = models.PositiveSmallIntegerField(default=3)
     closed = models.BooleanField(default=False)

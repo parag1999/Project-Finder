@@ -1,7 +1,15 @@
-from django.contrib.contenttypes.models import ContentType
-from .models import User
+import requests
+from .models import (
+    Hackathon,
+    HackathonTeam,
+    HackathonTeamRequest,
+    Skill,
+    User,
+    Project,
+    ProjectTeam,
+    ProjectTeamRequest
+)
 from rest_framework import serializers
-
 from rest_framework.serializers import (
     CharField,
     EmailField,
@@ -13,11 +21,13 @@ from rest_framework.serializers import (
 
 
 class UserDetailSerializer(ModelSerializer):
-    # password = serializers.CharField(style={"input_type": "password"})
+    skills = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+    interests = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
 
     class Meta:
         model = User
         fields = [
+            'id',
             'username',
             'email',
             'sap_id',
@@ -32,11 +42,7 @@ class UserDetailSerializer(ModelSerializer):
             'Github',
             'LinkedIN',
             'Behance',
-            'StackOverFlow',
-
-
-            # 'first_name',
-            # 'last_name',
+            'StackOverFlow'
         ]
 
 
@@ -62,9 +68,6 @@ class UserCreateSerializer(ModelSerializer):
             'LinkedIN',
             'Behance',
             'StackOverFlow',
-
-            # 'first_name',
-            # 'last_name',
         ]
 
         extra_kwargs = {"password": {"write_only": True}}
@@ -79,6 +82,7 @@ class UserCreateSerializer(ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data['password']
+
         user_obj = User(
             username=validated_data["username"],
             sap_id=validated_data["sap_id"],
@@ -89,11 +93,13 @@ class UserCreateSerializer(ModelSerializer):
             is_mentor=validated_data["is_mentor"],
             is_teacher=validated_data["is_teacher"],
             year=validated_data["year"],
-            skills=validated_data["skills"],
-            interests=validated_data["interests"],
         )
         user_obj.set_password(password)
         user_obj.save()
+        for i in range(len(validated_data["skills"])):
+            user_obj.skills.add(validated_data["skills"][i])
+        for i in range(len(validated_data["interests"])):
+            user_obj.skills.add(validated_data["interests"][i])
         return validated_data
 
 
@@ -108,3 +114,411 @@ class UserLoginSerializer(serializers.ModelSerializer):
             'password',
         ]
         extra_kwargs = {"password": {"write_only": True}}
+
+
+class HackathonSerializer(serializers.HyperlinkedModelSerializer):
+    creator = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+
+    class Meta:
+        model = Hackathon
+        fields = [
+            'id',
+            'name',
+            'creator',
+            'hackathon_desc',
+            'link',
+            'hackathon_date',
+        ]
+
+
+class HackathonTeamSerializer(serializers.ModelSerializer):
+    current_member1 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    current_member2 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    current_member3 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    leader = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    skills_required = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+
+    class Meta:
+        model = HackathonTeam
+        fields = [
+            'id',
+            'name',
+            'leader',
+            'current_member1',
+            'current_member2',
+            'current_member3',
+            'hackathon',
+            'vacancies',
+            'closed',
+            'cut_off_date',
+            'skills_required',
+        ]
+
+
+class HackathonTeamAddSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HackathonTeam
+        fields = [
+            'id',
+            'name',
+            'leader',
+            'current_member1',
+            'current_member2',
+            'current_member3',
+            'hackathon',
+            'vacancies',
+            'closed',
+            'cut_off_date',
+            'skills_required',
+        ]
+        read_only_fields = ('name', 'leader', 'hackathon', 'cut_off_date', 'skills_required')
+
+    def update(self, instance, validated_data):
+        instance.current_member1 = validated_data['current_member1']
+        instance.current_member2 = validated_data['current_member2']
+        instance.current_member3 = validated_data['current_member3']
+        instance.closed = validated_data['closed']
+        instance.vacancies = validated_data['vacancies']
+        instance.save()
+
+        return instance
+
+
+class HackathonTeamRequestDetailSerializer(serializers.ModelSerializer):
+    sender = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    team = serializers.HyperlinkedRelatedField(view_name="hackathonteam-detail", queryset=User.objects.all())
+    skills = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+
+    class Meta:
+        model = HackathonTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+
+
+class HackathonTeamRequestCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HackathonTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+
+
+class HackathonTeamRequestUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HackathonTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+        read_only_fields = ('sender', 'team', 'message', 'skills', 'create_date')
+
+    def update(self, instance, validated_data):
+        instance.status = validated_data['status']
+        instance.save()
+
+        return instance
+
+
+class SkillSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Skill
+        fields = ['id', 'skill']
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    creator = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    skills_used = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+
+    class Meta:
+        model = Project
+        fields = [
+            'id',
+            'name',
+            'creator',
+            'project_desc',
+            'link',
+            'skills_used',
+        ]
+
+
+class ProjectTeamSerializer(serializers.ModelSerializer):
+    current_member1 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    current_member2 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    current_member3 = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    leader = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+
+    class Meta:
+        model = ProjectTeam
+        fields = [
+            'id',
+            'name',
+            'leader',
+            'current_member1',
+            'current_member2',
+            'current_member3',
+            'project',
+            'vacancies',
+            'closed',
+        ]
+
+
+class ProjectTeamAddSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProjectTeam
+        fields = [
+            'id',
+            'name',
+            'leader',
+            'current_member1',
+            'current_member2',
+            'current_member3',
+            'project',
+            'vacancies',
+            'closed',
+        ]
+        read_only_fields = ('name', 'leader', 'project',)
+
+    def update(self, instance, validated_data):
+        instance.current_member1 = validated_data['current_member1']
+        instance.current_member2 = validated_data['current_member2']
+        instance.current_member3 = validated_data['current_member3']
+        instance.closed = validated_data['closed']
+        instance.vacancies = validated_data['vacancies']
+        instance.save()
+
+        return instance
+
+
+class ProjectTeamRequestDetailSerializer(serializers.ModelSerializer):
+    sender = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    team = serializers.HyperlinkedRelatedField(view_name="projectteam-detail", queryset=User.objects.all())
+    skills = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+
+    class Meta:
+        model = ProjectTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+
+
+class ProjectTeamRequestCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProjectTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+
+
+class ProjectTeamRequestUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProjectTeamRequest
+        fields = [
+            'id',
+            'sender',
+            'team',
+            'message',
+            'skills',
+            'create_date',
+            'status',
+        ]
+        read_only_fields = ('sender', 'team', 'message', 'skills', 'create_date',)
+
+    def update(self, instance, validated_data):
+        instance.status = validated_data['status']
+        instance.save()
+
+        return instance
+
+
+# class HackathonDetailSerializer(serializers.ModelSerializer):
+#     creator = serializers.StringRelatedField()
+#
+#     class Meta:
+#         model = Hackathon
+#         fields = [
+#             'id',
+#             'name',
+#             'creator',
+#             'hackathon_desc',
+#             'link',
+#             'hackathon_date',
+#         ]
+#
+#
+# class HackathonCreateSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Hackathon
+#         fields = [
+#             'id',
+#             'name',
+#             'creator',
+#             'hackathon_desc',
+#             'link',
+#             'hackathon_date',
+#         ]
+
+# class HackathonTeamCreateSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = HackathonTeam
+#         fields = [
+#             'id',
+#             'name',
+#             'leader',
+#             'current_member1',
+#             'current_member2',
+#             'current_member3',
+#             'hackathon',
+#             'vacancies',
+#             'closed',
+#             'cut_off_date',
+#             'skills_required',
+#         ]
+#
+#
+# class HackathonTeamDetailSerializer(serializers.ModelSerializer):
+#     current_member1 = serializers.StringRelatedField()
+#     current_member2 = serializers.StringRelatedField()
+#     current_member3 = serializers.StringRelatedField()
+#     leader = serializers.StringRelatedField()
+#     skills_required = serializers.StringRelatedField(many=True)
+#
+#     class Meta:
+#         model = HackathonTeam
+#         fields = [
+#             'id',
+#             'name',
+#             'leader',
+#             'current_member1',
+#             'current_member2',
+#             'current_member3',
+#             'hackathon',
+#             'vacancies',
+#             'closed',
+#             'cut_off_date',
+#             'skills_required',
+#         ]
+
+# class ProjectDetailSerializer(serializers.ModelSerializer):
+#     creator = serializers.StringRelatedField()
+#     skills_used = serializers.StringRelatedField(many=True)
+#
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'id',
+#             'name',
+#             'creator',
+#             'project_desc',
+#             'link',
+#             'skills_used',
+#         ]
+#
+#
+# class ProjectCreateSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'id',
+#             'name',
+#             'creator',
+#             'project_desc',
+#             'link',
+#             'skills_used'
+#         ]
+#
+
+# class ProjectTeamCreateSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = ProjectTeam
+#         fields = [
+#             'id',
+#             'name',
+#             'leader',
+#             'current_member1',
+#             'current_member2',
+#             'current_member3',
+#             'project',
+#             'vacancies',
+#             'closed',
+#
+#         ]
+#
+#
+# class ProjectTeamDetailSerializer(serializers.ModelSerializer):
+#     current_member1 = serializers.StringRelatedField()
+#     current_member2 = serializers.StringRelatedField()
+#     current_member3 = serializers.StringRelatedField()
+#     leader = serializers.StringRelatedField()
+#
+#     class Meta:
+#         model = ProjectTeam
+#         fields = [
+#             'id',
+#             'name',
+#             'leader',
+#             'current_member1',
+#             'current_member2',
+#             'current_member3',
+#             'project',
+#             'vacancies',
+#             'closed',
+#         ]
+
+    # def create(self, validated_data):
+#
+#     request_obj = HackathonTeamRequest(
+#
+#     team =validated_data["team"],
+#     message = validated_data["message"],
+#     create_date = validated_data["create_date"],
+#     status = validated_data["status"],
+#
+#     )
+#
+#     request_obj.sender = User.objects.get(username=request.user.username)
+#     request_obj.save()
+#     for i in range(len(validated_data["skills"])):
+#         request_obj.skills.add(validated_data["skills"][i])
+#     request_obj.save()
+#     return validated_data

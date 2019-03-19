@@ -1,5 +1,5 @@
 from django.contrib import admin
-from project_finder_web_app.models import User
+from project_finder_web_app.models import User, Skill
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -26,3 +26,4 @@ class UserAdmin(UserAdmin):
 
 
 admin.site.register(User)  # import UserAdmin and check for documentation for authentication
+admin.site.register(Skill)
