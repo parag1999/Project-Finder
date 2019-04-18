@@ -40,6 +40,20 @@ class IsStudent(permissions.BasePermission):
                 return True
         return False
 
+class IsNotMentor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user and request.user.is_authenticated:
+            if not (request.user.is_mentor):
+                return True
+        return False
+
+
+class IsMentor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user and request.user.is_authenticated:
+            if (request.user.is_mentor):
+                return True
+        return False
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

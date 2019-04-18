@@ -44,7 +44,7 @@ class User(AbstractUser):
 
 class Project(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'projects')
     skills_used = models.ManyToManyField(Skill)
     project_desc = models.TextField(max_length=500)
     link = models.URLField()
@@ -167,3 +167,18 @@ class HackathonTeamRequest(models.Model):
     def reject(self):
         self.status = 'R'
         self.save()
+
+class MentorRequest(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mentee')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mentor')
+    skills = models.ManyToManyField(Skill)
+    created_on = models.DateTimeField(default=timezone.now)
+    status_choices = (
+        ('A', 'Accepted'),
+        ('P', 'Pending'),
+        ('R', 'Rejected'),
+    )
+    status = models.CharField(max_length=1, choices=status_choices, default='P')
+
+    def __str__(self):
+        return self.sender.username + " --> " + self.receiver.username

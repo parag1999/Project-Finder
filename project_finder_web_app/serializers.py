@@ -6,7 +6,8 @@ from .models import (
     User,
     Project,
     ProjectTeam,
-    ProjectTeamRequest
+    ProjectTeamRequest,
+    MentorRequest
 )
 from rest_framework import serializers
 from rest_framework.serializers import (
@@ -18,31 +19,6 @@ from rest_framework.serializers import (
     ValidationError
 )
 
-
-class UserDetailSerializer(ModelSerializer):
-    skills = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
-    interests = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
-
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'email',
-            'sap_id',
-            'mobile',
-            'photo',
-            'is_mentor',
-            'is_teacher',
-            'bio',
-            'year',
-            'skills',
-            'interests',
-            'Github',
-            'LinkedIN',
-            'Behance',
-            'StackOverFlow'
-        ]
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -366,158 +342,46 @@ class ProjectTeamRequestUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
-# class HackathonDetailSerializer(serializers.ModelSerializer):
-#     creator = serializers.StringRelatedField()
-#
-#     class Meta:
-#         model = Hackathon
-#         fields = [
-#             'id',
-#             'name',
-#             'creator',
-#             'hackathon_desc',
-#             'link',
-#             'hackathon_date',
-#         ]
-#
-#
-# class HackathonCreateSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Hackathon
-#         fields = [
-#             'id',
-#             'name',
-#             'creator',
-#             'hackathon_desc',
-#             'link',
-#             'hackathon_date',
-#         ]
+class MentorRequestSerializer(serializers.ModelSerializer):
+    sender = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    receiver = serializers.HyperlinkedRelatedField(view_name="detail", queryset=User.objects.all())
+    class Meta:
+        model = MentorRequest
+        fields = "__all__" 
 
-# class HackathonTeamCreateSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = HackathonTeam
-#         fields = [
-#             'id',
-#             'name',
-#             'leader',
-#             'current_member1',
-#             'current_member2',
-#             'current_member3',
-#             'hackathon',
-#             'vacancies',
-#             'closed',
-#             'cut_off_date',
-#             'skills_required',
-#         ]
-#
-#
-# class HackathonTeamDetailSerializer(serializers.ModelSerializer):
-#     current_member1 = serializers.StringRelatedField()
-#     current_member2 = serializers.StringRelatedField()
-#     current_member3 = serializers.StringRelatedField()
-#     leader = serializers.StringRelatedField()
-#     skills_required = serializers.StringRelatedField(many=True)
-#
-#     class Meta:
-#         model = HackathonTeam
-#         fields = [
-#             'id',
-#             'name',
-#             'leader',
-#             'current_member1',
-#             'current_member2',
-#             'current_member3',
-#             'hackathon',
-#             'vacancies',
-#             'closed',
-#             'cut_off_date',
-#             'skills_required',
-#         ]
 
-# class ProjectDetailSerializer(serializers.ModelSerializer):
-#     creator = serializers.StringRelatedField()
-#     skills_used = serializers.StringRelatedField(many=True)
-#
-#     class Meta:
-#         model = Project
-#         fields = [
-#             'id',
-#             'name',
-#             'creator',
-#             'project_desc',
-#             'link',
-#             'skills_used',
-#         ]
-#
-#
-# class ProjectCreateSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Project
-#         fields = [
-#             'id',
-#             'name',
-#             'creator',
-#             'project_desc',
-#             'link',
-#             'skills_used'
-#         ]
-#
-
-# class ProjectTeamCreateSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = ProjectTeam
-#         fields = [
-#             'id',
-#             'name',
-#             'leader',
-#             'current_member1',
-#             'current_member2',
-#             'current_member3',
-#             'project',
-#             'vacancies',
-#             'closed',
-#
-#         ]
-#
-#
-# class ProjectTeamDetailSerializer(serializers.ModelSerializer):
-#     current_member1 = serializers.StringRelatedField()
-#     current_member2 = serializers.StringRelatedField()
-#     current_member3 = serializers.StringRelatedField()
-#     leader = serializers.StringRelatedField()
-#
-#     class Meta:
-#         model = ProjectTeam
-#         fields = [
-#             'id',
-#             'name',
-#             'leader',
-#             'current_member1',
-#             'current_member2',
-#             'current_member3',
-#             'project',
-#             'vacancies',
-#             'closed',
-#         ]
-
-    # def create(self, validated_data):
-#
-#     request_obj = HackathonTeamRequest(
-#
-#     team =validated_data["team"],
-#     message = validated_data["message"],
-#     create_date = validated_data["create_date"],
-#     status = validated_data["status"],
-#
-#     )
-#
-#     request_obj.sender = User.objects.get(username=request.user.username)
-#     request_obj.save()
-#     for i in range(len(validated_data["skills"])):
-#         request_obj.skills.add(validated_data["skills"][i])
-#     request_obj.save()
-#     return validated_data
+class MentorRequestUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MentorRequest
+        fields = "__all__"
+        read_only_fields = ('sender', 'receiver',  'skills', 'created_on',)
+    
+    def update(self, instance, validated_data):
+        instance.status = validated_data['status']
+        instance.save()
+        return instance    
+class UserDetailSerializer(ModelSerializer):
+    skills = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+    interests = serializers.HyperlinkedRelatedField(many=True, view_name='skill-detail', queryset=Skill.objects.all())
+    projects = ProjectSerializer(read_only=True, many=True,)
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'email',
+            'sap_id',
+            'mobile',
+            'photo',
+            'is_mentor',
+            'is_teacher',
+            'bio',
+            'year',
+            'skills',
+            'interests',
+            'Github',
+            'LinkedIN',
+            'Behance',
+            'StackOverFlow',
+            'projects'
+        ]
